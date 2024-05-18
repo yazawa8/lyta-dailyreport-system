@@ -98,50 +98,42 @@ public class EmployeeController {
         return "redirect:/employees";
     }
 
-    // 従業員更新画面
+    //従業員更新画面
     @GetMapping(value = "/{code}/update")
-    public String edit(@ModelAttribute Employee employee) {
+    public String edit(@PathVariable String code, Employee employee, Model model) {
 
-        return "employees/edit";
+        // updateからの遷移チェック、エラー表示に必要
+        if(code == null) {
+            model.addAttribute(employee);
+        } else {
+            model.addAttribute("employee", employeeService.findByCode(code));
+        }
+
+        return "employees/update";
     }
 
-    // 従業員更新処理
-    @PostMapping(value = "/{code}/update")
-    public String update(@Validated Employee employee, BindingResult res, Model model) {
+    //従業員更新処理
+    @PostMapping(value = "{code}/update")
+    public String update(@PathVariable String code, @Validated Employee employee, BindingResult res, Model model) {
 
-        // パスワード空白チェック
-        /*
-         * エンティティ側の入力チェックでも実装は行えるが、更新の方でパスワードが空白でもチェックエラーを出さずに
-         * 更新出来る仕様となっているため上記を考慮した場合に別でエラーメッセージを出す方法が簡単だと判断
-         */
-        if ("".equals(employee.getPassword())) {
-            // パスワードが空白だった場合
-            model.addAttribute(ErrorMessage.getErrorName(ErrorKinds.BLANK_ERROR),
-                    ErrorMessage.getErrorValue(ErrorKinds.BLANK_ERROR));
-
-            return edit(employee);
-
+        //氏名エラー有の場合はeditに遷移
+        if(res.hasErrors()) {
+            return edit(null, employee, model);
         }
 
-        // 入力チェック
-        if (res.hasErrors()) {
-            return edit(employee);
-        }
+        // 更新する値を画面から受け取ったemployeeより取り出して変数に登録
+        String name = employee.getName();
 
-        // 論理削除を行った従業員番号を指定すると例外となるためtry~catchで対応
-        // (findByIdでは削除フラグがTRUEのデータが取得出来ないため)
-        try {
-            ErrorKinds result = employeeService.update(employee);
+        String password = employee.getPassword();
 
-            if (ErrorMessage.contains(result)) {
-                model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
-                return edit(employee);
-            }
+        Employee.Role role = employee.getRole();
 
-        } catch (DataIntegrityViolationException e) {
-            model.addAttribute(ErrorMessage.getErrorName(ErrorKinds.DUPLICATE_EXCEPTION_ERROR),
-                    ErrorMessage.getErrorValue(ErrorKinds.DUPLICATE_EXCEPTION_ERROR));
-            return edit(employee);
+        ErrorKinds result = employeeService.update(code, name, password, role);
+
+        if (ErrorMessage.contains(result)) {
+            model.addAttribute(ErrorMessage.getErrorName(result),ErrorMessage.getErrorValue(result));
+            model.addAttribute("employee", employeeService.findByCode(code));
+            return edit(code, employee, model);
         }
 
         return "redirect:/employees";

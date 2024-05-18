@@ -54,16 +54,29 @@ public class EmployeeService {
 
     // 従業員更新
     @Transactional
-    public ErrorKinds update(Employee employee) {
+    public ErrorKinds update(String code, String name, String password, Employee.Role role) {
 
-        // パスワードチェック
-        ErrorKinds result = employeePasswordCheck(employee);
-        if (ErrorKinds.CHECK_OK != result) {
-            return result;
+        // 更新する従業員データを呼び出し
+        Employee employee = findByCode(code);
+
+        // 名前の更新
+        employee.setName(name);
+
+        // パスワードが空白以外の時は更新
+        if (!("".equals(password))) {
+            employee.setPassword(password);
+
+            // パスワードチェック
+            ErrorKinds result = employeePasswordCheck(employee);
+            if (ErrorKinds.CHECK_OK != result) {
+                return result;
+            }
         }
 
-        employee.setDeleteFlg(false);
+        // 権限の更新
+        employee.setRole(role);
 
+        // 更新日時の更新
         LocalDateTime now = LocalDateTime.now();
         employee.setUpdatedAt(now);
 

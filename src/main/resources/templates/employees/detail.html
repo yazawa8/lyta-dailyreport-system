@@ -46,7 +46,7 @@
                                 </table>
                                 <div class="mt-5 row g-1">
                                     <div class="col-auto">
-                                        <a th:href="@{/employees/{code}/edit(code=${code})}" class="btn btn-primary">更新</a>
+                                        <a th:href="@{/employees/{code}/update(code=${employee.code})}" class="btn btn-primary">更新</a>
                                     </div>
                                     <div class="col-auto">
                                         <form name="form" th:action="@{/employees/{code}/delete(code=${code})}" th:method="post">
