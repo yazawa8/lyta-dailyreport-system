@@ -9,21 +9,25 @@ import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.techacademy.constants.ErrorKinds;
 import com.techacademy.entity.Employee;
+import com.techacademy.entity.Report;
 import com.techacademy.repository.EmployeeRepository;
-import org.springframework.transaction.annotation.Transactional;
+
 
 @Service
 public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
+    private final ReportService reportService;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public EmployeeService(EmployeeRepository employeeRepository, PasswordEncoder passwordEncoder) {
+    public EmployeeService(EmployeeRepository employeeRepository, ReportService reportService, PasswordEncoder passwordEncoder) {
         this.employeeRepository = employeeRepository;
+        this.reportService = reportService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -96,6 +100,15 @@ public class EmployeeService {
         LocalDateTime now = LocalDateTime.now();
         employee.setUpdatedAt(now);
         employee.setDeleteFlg(true);
+
+        // 従業員に紐づいている日報リストを削除する処理
+        // 削除している従業員の日報一覧を呼び出し
+        List<Report> reportList = reportService.findByEmployeeCode(code);
+
+        // 呼び出した日報を拡張for文で繰り返して削除
+        for (Report report : reportList) {
+            reportService.delete(report.getId());
+        }
 
         return ErrorKinds.SUCCESS;
     }
