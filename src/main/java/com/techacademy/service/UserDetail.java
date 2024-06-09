@@ -17,11 +17,11 @@ public class UserDetail implements UserDetails {
     private final List<SimpleGrantedAuthority> authorities;
 
     public UserDetail(Employee employee) {
-        this.employee = employee;
+           this.employee = employee;
 
-        List<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>();
-        authorities.add(new SimpleGrantedAuthority(employee.getRole().toString()));
-        this.authorities = authorities;
+           List<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>();
+           authorities.add(new SimpleGrantedAuthority(employee.getRole().toString())); // 従業員の権限を追加
+           this.authorities = authorities;
     }
 
     public Employee getEmployee() {
