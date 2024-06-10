@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import com.techacademy.entity.Report;
 
 @Repository
-public interface ReportRepository extends JpaRepository<Report, String> {
+public interface ReportRepository extends JpaRepository<Report, Integer> {
 
     // employee_codeが一致する日報を検索してリスト化する
     List<Report> findByEmployeeCode(String employeeCode);
